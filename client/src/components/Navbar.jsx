@@ -6,62 +6,70 @@ import { logout } from '../slices/userSlice';
 const Navbar = () => {
   const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.user);
+  const { cartItems } = useSelector((state) => state.cart);
 
   const logoutHandler = () => {
     dispatch(logout());
   };
 
   return (
-    <nav className="sticky top-0 z-50 px-4 py-4">
-      <div className="container mx-auto">
-        <div className="glass-card flex justify-between items-center py-4 px-8 border-white/5 bg-white/5 backdrop-blur-xl shadow-2xl">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="bg-indigo-600 p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300 shadow-lg shadow-indigo-500/20">
-              <Wrench className="w-6 h-6 text-white" />
+    <nav className="sticky top-0 z-50 bg-white border-b border-slate-200">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex justify-between items-center">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="bg-slate-900 p-2 rounded-none transition-transform duration-200 group-hover:bg-safety-orange">
+              <Wrench className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-heading font-extrabold tracking-tighter text-white">
-              AUTOPARTS<span className="text-indigo-500">PRO</span>
+            <span className="text-xl font-black tracking-tighter text-slate-900">
+              UCT<span className="text-safety-orange">PARTS</span>
             </span>
           </Link>
 
-          <div className="flex gap-8 items-center">
-            <div className="hidden md:flex items-center bg-slate-900/40 border border-white/5 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-indigo-500/30 transition-all">
+          <div className="flex gap-10 items-center">
+            <div className="hidden lg:flex items-center border-b-2 border-slate-100 focus-within:border-safety-orange transition-colors py-1 px-1">
               <Search className="w-4 h-4 text-slate-400" />
               <input 
                 type="text" 
-                placeholder="Search parts..." 
-                className="bg-transparent border-none focus:ring-0 text-sm w-48 text-slate-200"
+                placeholder="PART NUMBER OR KEYWORD" 
+                className="bg-transparent border-none focus:ring-0 text-[10px] font-black tracking-[0.15em] w-48 text-slate-900 placeholder:text-slate-400 outline-none uppercase"
               />
             </div>
 
-            <Link to="/cart" className="relative group transition-colors">
-              <ShoppingCart className="w-6 h-6 text-slate-300 group-hover:text-indigo-400" />
-              <span className="absolute -top-2 -right-2 bg-indigo-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-slate-950">
-                0
-              </span>
+            <Link to="/cart" className="relative group transition-colors flex items-center gap-3">
+              <ShoppingCart className="w-5 h-5 text-slate-900 group-hover:text-safety-orange transition-colors" />
+              <div className="hidden md:block">
+                <div className="label-industrial leading-none">Your Cart</div>
+                <div className="text-[10px] font-black text-slate-900 leading-none">
+                  {cartItems.length} ITEMS
+                </div>
+              </div>
+              {cartItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-safety-orange text-[8px] font-black px-1 py-0.5 min-w-[16px] text-center text-white">
+                   {cartItems.reduce((a, c) => a + c.qty, 0)}
+                </span>
+              )}
             </Link>
             
+            <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+
             {userInfo ? (
               <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3 pl-6 border-l border-white/10">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center font-bold text-xs shadow-inner">
-                    {userInfo.name.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="text-sm font-medium text-slate-200 hidden lg:block">
-                    {userInfo.name}
+                <div className="flex flex-col items-end">
+                  <div className="label-industrial leading-none">Account</div>
+                  <span className="text-[10px] font-black text-slate-900 uppercase">
+                    {userInfo.name.split(' ')[0]}
                   </span>
                 </div>
                 <button 
                   onClick={logoutHandler}
-                  className="p-2 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-colors"
+                  className="p-2 border border-transparent hover:border-slate-200 text-slate-400 hover:text-slate-900 transition-all"
                   title="Logout"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <Link to="/login" className="btn-primary py-2 px-6 text-sm flex items-center gap-2">
-                <User className="w-4 h-4" />
+              <Link to="/login" className="btn-orange text-[10px] py-3 px-6 h-fit">
                 Sign In
               </Link>
             )}

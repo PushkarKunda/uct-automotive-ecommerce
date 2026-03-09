@@ -1,157 +1,194 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../slices/productSlice';
-import { Link as RouterLink } from 'react-router-dom';
-import { Search, Car, Calendar, Tool, AlertCircle, ShoppingCart, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Search, Car, ChevronRight, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const HomeScreen = () => {
   const dispatch = useDispatch();
-  const { items: products, status, error } = useSelector((state) => state.products);
+  const { items: products, status } = useSelector((state) => state.products);
 
-  const [make, setMake] = useState('');
-  const [model, setModel] = useState('');
-  const [year, setYear] = useState('');
+  const [selection, setSelection] = useState({
+    year: '',
+    make: '',
+    model: '',
+    engine: ''
+  });
 
   useEffect(() => {
     dispatch(fetchProducts(''));
   }, [dispatch]);
 
-  const handleSearch = (e) => {
+  const handleFitmentSearch = (e) => {
     e.preventDefault();
-    const queryParts = [];
-    if (make) queryParts.push(`make=${make}`);
-    if (model) queryParts.push(`model=${model}`);
-    if (year) queryParts.push(`year=${year}`);
-    
-    const queryString = queryParts.length > 0 ? `&${queryParts.join('&')}` : '';
-    dispatch(fetchProducts(queryString));
+    const query = Object.entries(selection)
+      .filter(([_, value]) => value !== '')
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&');
+    dispatch(fetchProducts(query ? `&${query}` : ''));
   };
 
-  return (
-    <div className="space-y-12 pb-20">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl py-20 px-8 text-center bg-slate-900 border border-white/5 shadow-2xl">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(79,70,229,0.15),transparent_70%)] pointer-events-none"></div>
-        <div className="relative z-10 max-w-3xl mx-auto space-y-6">
-          <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase border border-indigo-500/20">
-             UCT Internship Automotive Pro
-          </div>
-          <h1 className="text-5xl md:text-7xl font-heading font-extrabold text-white leading-tight">
-            Find the <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Perfect Fit</span>
-          </h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto font-medium">
-            Precision-engineered parts tracked by vehicle compatibility. No more guesswork, just performance.
-          </p>
+  const categories = [
+    { name: 'Brake Pads', image: '/images/brake_pads.png' },
+    { name: 'Batteries', image: '/images/battery.png' },
+    { name: 'Oil Filters', image: '/images/oil_filter.png' },
+    { name: 'Spark Plugs', image: '/images/spark_plugs.png' }
+  ];
 
-          {/* Fitment Search Bar */}
-          <form 
-            onSubmit={handleSearch}
-            className="mt-10 glass-card p-4 flex flex-col md:flex-row gap-4 items-center border-white/10 bg-white/5 backdrop-blur-2xl"
-          >
-            <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-              <div className="relative">
-                <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
-                <input
-                  type="text"
-                  placeholder="Make (e.g. BMW)"
-                  className="w-full bg-slate-950/50 border border-white/5 rounded-xl pl-10 pr-4 py-3 text-white focus:ring-2 focus:ring-indigo-500/50 transition-all outline-none text-sm font-medium"
-                  value={make}
-                  onChange={(e) => setMake(e.target.value)}
-                />
-              </div>
-              <div className="relative">
-                <Tool className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
-                <input
-                  type="text"
-                  placeholder="Model (e.g. M3)"
-                  className="w-full bg-slate-950/50 border border-white/5 rounded-xl pl-10 pr-4 py-3 text-white focus:ring-2 focus:ring-indigo-500/50 transition-all outline-none text-sm font-medium"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                />
-              </div>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
-                <input
-                  type="number"
-                  placeholder="Year"
-                  className="w-full bg-slate-950/50 border border-white/5 rounded-xl pl-10 pr-4 py-3 text-white focus:ring-2 focus:ring-indigo-500/50 transition-all outline-none text-sm font-medium"
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                />
-              </div>
+  return (
+    <div className="space-y-16 pb-20">
+      {/* Vehicle Selector Hero */}
+      <section className="bg-slate-100 border-b border-slate-200 -mx-4 px-4 py-16">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <h1 className="text-5xl font-black text-slate-900 leading-[0.9] uppercase">
+                Expert Parts<br/><span className="text-safety-orange">Precision Fit</span>
+              </h1>
+              <p className="text-slate-500 font-medium max-w-sm tracking-tight border-l-4 border-safety-orange pl-4">
+                Enter your vehicle details below to guarantee 100% compatibility with our industrial-grade components.
+              </p>
             </div>
-            <button type="submit" className="btn-primary w-full md:w-auto h-full px-8 py-3.5 flex items-center justify-center gap-2 group">
-              <Search className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span>Search</span>
-            </button>
-          </form>
+
+            <div className="bg-white border-2 border-slate-900 p-8 shadow-[12px_12px_0px_0px_rgba(15,23,42,1)]">
+              <div className="label-industrial mb-6">Vehicle Selector</div>
+              <form onSubmit={handleFitmentSearch} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-900 uppercase">Year</label>
+                    <select 
+                      className="select-industrial"
+                      value={selection.year}
+                      onChange={(e) => setSelection({...selection, year: e.target.value})}
+                    >
+                      <option value="">SELECT YEAR</option>
+                      <option value="2024">2024</option>
+                      <option value="2023">2023</option>
+                      <option value="2022">2022</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-900 uppercase">Make</label>
+                    <select 
+                      className="select-industrial"
+                      value={selection.make}
+                      onChange={(e) => setSelection({...selection, make: e.target.value})}
+                    >
+                      <option value="">SELECT MAKE</option>
+                      <option value="BMW">BMW</option>
+                      <option value="Audi">Audi</option>
+                      <option value="Mercedes">Mercedes</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-900 uppercase">Model</label>
+                    <select 
+                      className="select-industrial"
+                      value={selection.model}
+                      onChange={(e) => setSelection({...selection, model: e.target.value})}
+                    >
+                      <option value="">SELECT MODEL</option>
+                      <option value="M3">M3</option>
+                      <option value="A4">A4</option>
+                      <option value="C-Class">C-Class</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-900 uppercase">Engine</label>
+                    <select 
+                      className="select-industrial"
+                      value={selection.engine}
+                      onChange={(e) => setSelection({...selection, engine: e.target.value})}
+                    >
+                      <option value="">SELECT ENGINE</option>
+                      <option value="3.0L L6">3.0L L6</option>
+                      <option value="2.0L T4">2.0L T4</option>
+                      <option value="4.0L V8">4.0L V8</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" className="btn-orange w-full py-5">
+                  Find Compatible Parts <ChevronRight className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       </section>
 
-      {status === 'loading' && (
-        <div className="flex justify-center py-20">
-          <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
-        </div>
-      )}
-
-      {status === 'failed' && (
-        <div className="glass-card border-red-500/20 bg-red-500/5 flex items-center gap-4 text-red-400 mx-auto max-w-md">
-          <AlertCircle className="w-6 h-6" />
-          <p className="font-medium">{error}</p>
-        </div>
-      )}
-
-      {/* Product Grid */}
-      <section>
-        <div className="flex justify-between items-end mb-10">
-          <div>
-            <h2 className="text-3xl font-heading font-bold text-white tracking-tight">Top Components</h2>
-            <div className="h-1 w-20 bg-indigo-600 mt-2 rounded-full"></div>
-          </div>
-          <button className="text-sm font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 group transition-colors">
-            All Inventory <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      {/* Categories Section */}
+      <section className="container mx-auto px-4">
+        <div className="flex justify-between items-end mb-10 border-b-4 border-slate-900 pb-4">
+          <h2 className="text-3xl font-black uppercase text-slate-900 italic">Major Categories</h2>
+          <button className="label-industrial hover:text-safety-orange transition-colors flex items-center gap-2">
+            Show all catalogs <ChevronRight className="w-3 h-3" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {products.map((product) => (
-            <RouterLink 
-              to={`/product/${product._id}`} 
-              key={product._id}
-              className="glass-card p-0 group flex flex-col overflow-hidden border-white/5 hover:border-indigo-500/40 bg-white/5 backdrop-blur-xl"
-            >
-              <div className="aspect-[4/3] w-full overflow-hidden bg-slate-900 border-b border-white/5">
-                <img
-                  src={product.image || 'https://via.placeholder.com/400x300?text=Auto+Part'}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                />
-                <div className="absolute top-4 right-4 bg-indigo-600/90 text-white text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest backdrop-blur-md">
-                  {product.brand}
-                </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {categories.map((cat, i) => (
+            <div key={i} className="swiss-card group cursor-pointer hover:bg-slate-50">
+              <div className="aspect-square bg-slate-100 mb-6 overflow-hidden border border-slate-200">
+                 <img 
+                    src={cat.image} 
+                    alt={cat.name} 
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                 />
               </div>
-              <div className="p-6 flex-grow flex flex-col">
-                <h3 className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug mb-3">
-                  {product.name}
-                </h3>
-                <p className="text-slate-400 text-sm line-clamp-2 mb-6 flex-grow font-medium leading-relaxed">
-                  {product.description}
-                </p>
-                <div className="flex items-center justify-between mt-auto">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Price</span>
-                    <span className="text-2xl font-heading font-black text-white">
-                      ${product.price.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="bg-indigo-600 hover:bg-indigo-500 p-3 rounded-xl text-white shadow-lg shadow-indigo-600/20 active:scale-90 transition-all">
-                    <ShoppingCart className="w-5 h-5" />
-                  </div>
-                </div>
-              </div>
-            </RouterLink>
+              <h3 className="text-sm font-black uppercase tracking-tight text-slate-900 group-hover:text-safety-orange transition-colors">
+                {cat.name}
+              </h3>
+              <div className="h-0.5 w-8 bg-slate-300 mt-2 group-hover:w-full group-hover:bg-safety-orange transition-all"></div>
+            </div>
           ))}
         </div>
+      </section>
+
+      {/* Products Grid */}
+      <section className="container mx-auto px-4">
+        <div className="flex justify-between items-end mb-10">
+          <div className="space-y-1">
+             <div className="label-industrial">Inventory</div>
+             <h2 className="text-3xl font-black uppercase text-slate-900">Featured Components</h2>
+          </div>
+        </div>
+
+        {status === 'loading' ? (
+          <div className="flex items-center gap-4 py-20 text-slate-400 font-bold uppercase tracking-widest text-xs">
+             <div className="w-4 h-4 border-2 border-slate-200 border-t-safety-orange animate-spin"></div>
+             Analyzing global inventory...
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 border border-slate-200">
+            {products.map((product) => (
+              <Link 
+                to={`/product/${product._id}`} 
+                key={product._id}
+                className="bg-white p-8 group flex flex-col hover:z-10 hover:shadow-2xl transition-all"
+              >
+                <div className="aspect-[4/3] mb-8 relative overflow-hidden bg-slate-50 border border-slate-100">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+                <div className="label-industrial">{product.brand}</div>
+                <h3 className="text-lg font-black text-slate-900 leading-tight mb-4 group-hover:text-safety-orange transition-colors min-h-[3.5rem]">
+                  {product.name}
+                </h3>
+                <div className="mt-auto flex justify-between items-center pt-6 border-t border-slate-100">
+                  <span className="text-xl font-black text-slate-900">
+                    ${product.price.toLocaleString()}
+                  </span>
+                  <div className="label-industrial text-[8px] border border-slate-200 px-2 py-1">
+                    In Stock
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

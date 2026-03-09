@@ -15,20 +15,18 @@ const CartScreen = () => {
   };
 
   const checkoutHandler = () => {
-    navigate('/checkout');
+    navigate('/login?redirect=/checkout');
   };
 
   if (cartItems.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-40 animate-in fade-in zoom-in duration-500">
-        <div className="glass-card p-12 text-center border-white/5 bg-white/5 backdrop-blur-xl">
-           <div className="bg-indigo-500/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-400">
-             <ShoppingBag className="w-10 h-10" />
-           </div>
-           <h2 className="text-3xl font-heading font-black text-white mb-4">Your cart is empty</h2>
-           <p className="text-slate-400 mb-8 max-w-xs mx-auto">Looks like you haven't added any premium components to your order yet.</p>
-           <Link to="/" className="btn-primary flex items-center gap-2 justify-center py-4">
-             <ChevronLeft className="w-5 h-5" /> Start Shopping
+      <div className="flex flex-col items-center justify-center py-40">
+        <div className="swiss-card max-w-lg w-full text-center space-y-8 p-16 border-2 border-slate-900 shadow-[10px_10px_0px_0px_rgba(226,232,240,1)]">
+           <ShoppingBag className="w-16 h-16 text-slate-200 mx-auto" />
+           <h2 className="text-4xl font-black text-slate-900 uppercase italic">Empty Inventory</h2>
+           <p className="text-slate-500 font-medium tracking-tight">Your technical selection is empty. Please return to the catalog to choose components.</p>
+           <Link to="/" className="btn-オレンジ flex items-center gap-2 justify-center py-5 bg-slate-900 hover:bg-slate-800 text-white font-bold uppercase tracking-widest text-xs transition-colors">
+             <ChevronLeft className="w-4 h-4" /> Browse Catalog
            </Link>
         </div>
       </div>
@@ -37,75 +35,74 @@ const CartScreen = () => {
 
   return (
     <div className="pb-20">
-      <h1 className="text-4xl font-heading font-black text-white mb-10 flex items-center gap-4">
-        <ShoppingBag className="w-8 h-8 text-indigo-500" /> Shopping Cart
-        <span className="text-sm font-bold bg-white/5 px-3 py-1 rounded-lg text-slate-500 uppercase tracking-tighter">
-          {cartItems.reduce((acc, item) => acc + item.qty, 0)} Items
-        </span>
-      </h1>
+      <div className="flex justify-between items-end mb-12 border-b-4 border-slate-900 pb-6">
+        <h1 className="text-4xl font-black uppercase text-slate-900">Your Selection</h1>
+        <div className="label-industrial text-lg">{cartItems.length} COMPONENTS</div>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
         {/* Cart Items */}
-        <div className="lg:col-span-2 space-y-6">
-          {cartItems.map((item) => (
-            <div key={item._id} className="glass-card p-6 flex flex-col md:flex-row gap-8 items-center border-white/5 bg-white/5 group hover:border-indigo-500/30">
-              <div className="w-32 h-32 rounded-xl overflow-hidden bg-slate-900 flex-shrink-0 border border-white/5">
-                <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              
-              <div className="flex-grow space-y-2">
-                <div className="flex justify-between items-start">
-                  <Link to={`/product/${item._id}`} className="text-lg font-bold text-white hover:text-indigo-400 transition-colors">
+        <div className="lg:col-span-2">
+          <div className="border border-slate-200 divide-y divide-slate-200">
+            {cartItems.map((item) => (
+              <div key={item._id} className="p-8 flex flex-col md:flex-row gap-8 items-center bg-white group hover:bg-slate-50 transition-colors">
+                <div className="w-32 h-32 flex-shrink-0 bg-white border border-slate-100 p-4">
+                  <img src={item.image} alt={item.name} className="w-full h-full object-contain mix-blend-multiply" />
+                </div>
+                
+                <div className="grow space-y-2 text-center md:text-left">
+                  <div className="label-industrial">{item.brand}</div>
+                  <Link to={`/product/${item._id}`} className="text-xl font-black text-slate-900 hover:text-safety-orange transition-colors uppercase">
                     {item.name}
                   </Link>
+                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">PartID: {item._id?.substring(0, 10).toUpperCase()}</p>
+                </div>
+
+                <div className="flex items-center border border-slate-300">
                   <button 
-                    onClick={() => removeFromCartHandler(item._id)}
-                    className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                    onClick={() => dispatch(addToCart({ ...item, qty: Math.max(1, item.qty - 1) }))}
+                    className="px-4 py-2 hover:bg-slate-200 transition-colors font-black text-slate-900"
+                  ><Minus className="w-4 h-4" /></button>
+                  <span className="px-6 text-slate-900 font-black text-sm">{item.qty}</span>
+                  <button 
+                    onClick={() => dispatch(addToCart({ ...item, qty: Math.min(item.countInStock || 10, item.qty + 1) }))}
+                    className="px-4 py-2 hover:bg-slate-200 transition-colors font-black text-slate-900"
+                  ><Plus className="w-4 h-4" /></button>
                 </div>
-                <p className="text-slate-500 text-xs font-black uppercase tracking-widest">{item.brand}</p>
-                
-                <div className="flex items-center justify-between pt-4">
-                  <div className="flex items-center bg-slate-950 border border-white/5 rounded-xl overflow-hidden shadow-inner">
-                    <button 
-                      onClick={() => dispatch(addToCart({ ...item, qty: Math.max(1, item.qty - 1) }))}
-                      className="px-3 py-1.5 hover:bg-white/5 text-white font-black"
-                    ><Minus className="w-4 h-4" /></button>
-                    <span className="px-5 text-indigo-400 font-black text-sm">{item.qty}</span>
-                    <button 
-                      onClick={() => dispatch(addToCart({ ...item, qty: Math.min(item.countInStock || 10, item.qty + 1) }))}
-                      className="px-3 py-1.5 hover:bg-white/5 text-white font-black"
-                    ><Plus className="w-4 h-4" /></button>
-                  </div>
-                  <span className="text-xl font-heading font-black text-white">
-                    ${(item.price * item.qty).toLocaleString()}
-                  </span>
+
+                <div className="text-xl font-black text-slate-900 min-w-[120px] text-right">
+                  ${(item.price * item.qty).toLocaleString()}
                 </div>
+
+                <button 
+                  onClick={() => removeFromCartHandler(item._id)}
+                  className="p-3 text-slate-300 hover:text-red-600 transition-colors"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="glass-card sticky top-28 border-indigo-500/20 bg-indigo-500/5 backdrop-blur-2xl p-8 space-y-6">
-            <h2 className="text-2xl font-heading font-black text-white">Order Summary</h2>
+          <div className="bg-slate-100 p-10 space-y-8 sticky top-32 border border-slate-200 shadow-[15px_15px_0px_0px_rgba(255,95,31,0.1)]">
+            <h2 className="text-2xl font-black uppercase text-slate-900 italic border-b-2 border-slate-900 pb-4">Quote Summary</h2>
             
-            <div className="space-y-4 pt-4">
-              <div className="flex justify-between text-slate-400 font-medium">
+            <div className="space-y-4">
+              <div className="flex justify-between text-xs font-black uppercase tracking-widest text-slate-500">
                 <span>Subtotal</span>
-                <span className="text-white">${cartItems.reduce((acc, item) => acc + item.qty * item.price, 0).toLocaleString()}</span>
+                <span className="text-slate-900">${cartItems.reduce((acc, item) => acc + item.qty * item.price, 0).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-slate-400 font-medium">
-                <span>Shipping</span>
-                <span className="text-cyan-400 font-bold uppercase text-[10px] tracking-widest">Free Express</span>
+              <div className="flex justify-between text-xs font-black uppercase tracking-widest text-slate-500">
+                <span>Standard Logistics</span>
+                <span className="text-slate-900 font-black">Calculated at Checkout</span>
               </div>
-              <div className="h-px bg-white/10 my-4"></div>
+              <div className="h-px bg-slate-200 my-4"></div>
               <div className="flex justify-between items-baseline">
-                <span className="text-white font-bold">Total Amount</span>
-                <span className="text-3xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
+                <span className="text-slate-900 font-black uppercase text-[10px]">Estimated Total</span>
+                <span className="text-4xl font-black text-slate-900 tracking-tighter">
                   ${cartItems.reduce((acc, item) => acc + item.qty * item.price, 0).toLocaleString()}
                 </span>
               </div>
@@ -113,14 +110,14 @@ const CartScreen = () => {
 
             <button 
               onClick={checkoutHandler}
-              className="btn-primary w-full py-5 flex items-center justify-center gap-3 mt-4"
+              className="btn-orange w-full py-6 text-sm"
             >
-              Secure Checkout <ArrowRight className="w-5 h-5" />
+              Initialize Checkout <ArrowRight className="w-5 h-5" />
             </button>
 
-            <div className="pt-6 flex items-center justify-center gap-4 text-slate-500">
-              <div className="bg-white/5 px-3 py-1 rounded text-[10px] font-black tracking-widest border border-white/5 uppercase">Stripe Secure</div>
-              <div className="bg-white/5 px-3 py-1 rounded text-[10px] font-black tracking-widest border border-white/5 uppercase">Global Track</div>
+            <div className="pt-6 grid grid-cols-2 gap-4 text-center">
+               <div className="p-3 bg-white border border-slate-200 label-industrial text-[8px]">Secure SSL</div>
+               <div className="p-3 bg-white border border-slate-200 label-industrial text-[8px]">Global Export</div>
             </div>
           </div>
         </div>

@@ -1,153 +1,175 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { register } from '../slices/userSlice';
-import { User, Mail, Lock, UserPlus, AlertCircle, ChevronRight } from 'lucide-react';
+import { register as registerAction } from '../slices/userSlice';
+import { User, Mail, Lock, Key, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 
 const RegisterScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState(null);
+  const [localError, setLocalError] = useState(null);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const user = useSelector((state) => state.user);
-  const { userInfo, status, error } = user;
+  const { userInfo, status, error } = useSelector((state) => state.user);
+  const isLoading = status === 'loading';
 
-  const redirect = location.search ? location.search.split('=')[1] : '/';
+  const { search } = useLocation();
+  const sp = new URLSearchParams(search);
+  const redirect = sp.get('redirect') || '/';
 
   useEffect(() => {
     if (userInfo) {
       navigate(redirect);
     }
-  }, [navigate, userInfo, redirect]);
+  }, [navigate, redirect, userInfo]);
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setMessage('Passwords do not match');
-    } else {
-      dispatch(register({ name, email, password }));
+      setLocalError('Passwords do not match');
+      return;
     }
+    setLocalError(null);
+    dispatch(registerAction({ name, email, password }));
   };
 
   return (
-    <div className="max-w-md mx-auto py-20 px-4">
-      <div className="glass-card p-10 border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl space-y-8">
-        <div className="text-center space-y-2">
-          <div className="bg-cyan-600/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-cyan-400 border border-cyan-500/20">
-            <UserPlus className="w-8 h-8" />
+    <div className="flex justify-center items-center py-20">
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-white border-2 border-slate-900 shadow-[20px_20px_0px_0px_rgba(255,95,31,0.05)]">
+        
+        {/* Left Content */}
+        <div className="bg-slate-950 p-12 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="relative z-10 space-y-8">
+             <div className="label-industrial text-safety-orange tracking-[0.3em]">Corporate Registration</div>
+             <h2 className="text-6xl font-black uppercase leading-[0.8] tracking-tighter italic">Create<br/>Expert<br/>Profile</h2>
+             <div className="h-1 w-20 bg-safety-orange"></div>
+             <p className="text-slate-400 text-sm font-medium tracking-tight max-w-xs">
+                Unlock industrial-tier pricing, fleet management tools, and priority logistics support with a professional account.
+             </p>
           </div>
-          <h1 className="text-4xl font-heading font-black text-white tracking-tight">Create Account</h1>
-          <p className="text-slate-400 font-medium">Join the professional parts network</p>
+
+          <div className="relative z-10 pt-10">
+             <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                   <ShieldCheck className="w-6 h-6 text-safety-orange" />
+                   <div className="text-[10px] font-black uppercase tracking-widest leading-tight">Data Integrity<br/>Guaranteed</div>
+                </div>
+                <div className="space-y-2">
+                   <Key className="w-6 h-6 text-safety-orange" />
+                   <div className="text-[10px] font-black uppercase tracking-widest leading-tight">Instant Account<br/>Authorization</div>
+                </div>
+             </div>
+          </div>
+
+          {/* Visual Elements */}
+          <div className="absolute top-0 right-0 w-full h-full opacity-5 pointer-events-none">
+             <div className="grid grid-cols-6 h-full border-l border-white/20">
+                {[...Array(6)].map((_, i) => <div key={i} className="border-r border-white/20"></div>)}
+             </div>
+          </div>
         </div>
-        
-        {(message || error) && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            {message || error}
-          </div>
-        )}
-        
-        <form onSubmit={submitHandler} className="space-y-5">
-          <div className="space-y-2">
-            <label className="text-slate-400 text-xs font-black uppercase tracking-widest pl-1" htmlFor="name">
-              Full Name
-            </label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
-                id="name"
-                type="text"
-                placeholder="YOUR NAME"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="input-field pl-12 border-white/5 bg-slate-950/40 text-sm font-medium uppercase tracking-wider"
-                required
-              />
+
+        {/* Right Form */}
+        <div className="p-12 md:p-16 space-y-10">
+           <div className="space-y-1">
+             <h1 className="text-3xl font-black uppercase text-slate-900">Initialize Profile</h1>
+             <p className="label-industrial lowercase text-slate-400 italic">Phase 01: Account Setup</p>
+           </div>
+
+           {(error || localError) && (
+            <div className="bg-red-50 border-l-4 border-red-600 p-4 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <span className="text-xs font-black uppercase text-red-600 tracking-tight">
+                {localError || error || 'Registration Fault Detected'}
+              </span>
             </div>
+          )}
+
+           <form onSubmit={submitHandler} className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-1">
+                  <label className="label-industrial">Full Name</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      className="input-industrial pl-12"
+                      placeholder="Jane Doe"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="label-industrial">Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="email"
+                      className="input-industrial pl-12"
+                      placeholder="jane@company.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="label-industrial">Define Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="password"
+                    className="input-industrial pl-12"
+                    placeholder="Min. 8 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1 pb-4">
+                <label className="label-industrial">Verify Password</label>
+                <div className="relative">
+                  <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="password"
+                    className="input-industrial pl-12"
+                    placeholder="Repeat password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-orange w-full py-5 text-sm group"
+              >
+                {isLoading ? 'Processing...' : 'Complete Registration'}
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+           </form>
+
+           <div className="pt-8 border-t border-slate-100 flex justify-between items-baseline">
+             <div className="label-industrial lowercase text-slate-400 italic">Existing corporate member?</div>
+             <Link 
+              to={redirect ? `/login?redirect=${redirect}` : '/login'}
+              className="text-[10px] font-black uppercase tracking-widest text-slate-900 hover:text-safety-orange transition-colors"
+             >
+               Return to Login
+             </Link>
           </div>
-
-          <div className="space-y-2">
-            <label className="text-slate-400 text-xs font-black uppercase tracking-widest pl-1" htmlFor="email">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
-                id="email"
-                type="email"
-                placeholder="PRO@AUTOPARTS.COM"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field pl-12 border-white/5 bg-slate-950/40 text-sm font-medium uppercase tracking-wider"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-slate-400 text-xs font-black uppercase tracking-widest pl-1" htmlFor="password">
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-field pl-12 border-white/5 bg-slate-950/40"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-slate-400 text-xs font-black uppercase tracking-widest pl-1" htmlFor="confirmPassword">
-              Verify Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="input-field pl-12 border-white/5 bg-slate-950/40"
-                required
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="btn-primary w-full py-4 mt-4 flex items-center justify-center gap-2 text-md transition-all group from-indigo-600 to-indigo-700 bg-gradient-to-br"
-            disabled={status === 'loading'}
-          >
-            {status === 'loading' ? (
-              <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-            ) : (
-              <>
-                Initialize Account <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="pt-6 text-center border-t border-white/5">
-          <p className="text-slate-500 text-sm font-bold">
-            ALREADY PART OF THE NETWORK?{' '}
-            <Link to={redirect ? `/login?redirect=${redirect}` : '/login'} className="text-cyan-400 hover:text-cyan-300 ml-2 transition-colors">
-              SIGN IN
-            </Link>
-          </p>
         </div>
       </div>
     </div>
