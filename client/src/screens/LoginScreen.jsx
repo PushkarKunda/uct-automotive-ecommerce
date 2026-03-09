@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../slices/userSlice';
+import { Mail, Lock, LogIn, AlertCircle, ChevronRight } from 'lucide-react';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -28,58 +29,83 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md border border-gray-100">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Sign In</h1>
-      
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">{error}</div>}
-      
-      <form onSubmit={submitHandler}>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-            Email Address
-          </label>
-          <input
-            id="email"
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+    <div className="max-w-md mx-auto py-20 px-4">
+      <div className="glass-card p-10 border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl space-y-8">
+        <div className="text-center space-y-2">
+          <div className="bg-indigo-600/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-500 border border-indigo-500/20">
+            <LogIn className="w-8 h-8" />
+          </div>
+          <h1 className="text-4xl font-heading font-black text-white tracking-tight">Welcome Back</h1>
+          <p className="text-slate-400 font-medium">Secure access to your Pro account</p>
         </div>
+        
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            {error}
+          </div>
+        )}
+        
+        <form onSubmit={submitHandler} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-slate-400 text-xs font-black uppercase tracking-widest pl-1" htmlFor="email">
+              Email Address
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                id="email"
+                type="email"
+                placeholder="PRO@AUTOPARTS.COM"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-field pl-12 border-white/5 bg-slate-950/40 text-sm font-medium uppercase tracking-wider"
+                required
+              />
+            </div>
+          </div>
 
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+          <div className="space-y-2">
+            <label className="text-slate-400 text-xs font-black uppercase tracking-widest pl-1" htmlFor="password">
+              Security Key
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-field pl-12 border-white/5 bg-slate-950/40"
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="btn-primary w-full py-4 flex items-center justify-center gap-2 text-md transition-all group"
+            disabled={status === 'loading'}
+          >
+            {status === 'loading' ? (
+              <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+            ) : (
+              <>
+                Confirm Identity <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="pt-6 text-center border-t border-white/5">
+          <p className="text-slate-500 text-sm font-bold">
+            NEW CUSTOMER?{' '}
+            <Link to={redirect ? `/register?redirect=${redirect}` : '/register'} className="text-indigo-400 hover:text-indigo-300 ml-2 transition-colors">
+              CREATE PRO ACCOUNT
+            </Link>
+          </p>
         </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 disabled:bg-gray-400"
-          disabled={status === 'loading'}
-        >
-          {status === 'loading' ? 'Signing In...' : 'Sign In'}
-        </button>
-      </form>
-
-      <div className="mt-6 text-center">
-        <p className="text-gray-600 text-sm">
-          New Customer?{' '}
-          <Link to={redirect ? `/register?redirect=${redirect}` : '/register'} className="text-blue-600 font-bold hover:underline">
-            Register
-          </Link>
-        </p>
       </div>
     </div>
   );
