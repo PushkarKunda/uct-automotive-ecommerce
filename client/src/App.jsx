@@ -4,6 +4,8 @@ import HomeScreen from './screens/HomeScreen';
 import ProductScreen from './screens/ProductScreen';
 import CartScreen from './screens/CartScreen';
 import CheckoutScreen from './screens/CheckoutScreen';
+import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
           <Route path="/product/:id" element={<ProductScreen />} />
           <Route path="/cart" element={<CartScreen />} />
           <Route path="/checkout" element={<CheckoutScreen />} />
+          <Route path="/login" element={<LoginScreen />} />
+          <Route path="/register" element={<RegisterScreen />} />
         </Routes>
       </main>
       <footer className="bg-gray-800 text-white py-6 text-center">
